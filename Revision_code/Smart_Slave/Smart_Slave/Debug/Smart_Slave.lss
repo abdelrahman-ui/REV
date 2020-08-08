@@ -1,0 +1,290 @@
+
+Smart_Slave.elf:     file format elf32-avr
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         00000188  00000000  00000000  00000054  2**1
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .data         00000000  00800060  00800060  000001dc  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  2 .comment      00000030  00000000  00000000  000001dc  2**0
+                  CONTENTS, READONLY
+  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  0000020c  2**2
+                  CONTENTS, READONLY
+  4 .debug_aranges 00000028  00000000  00000000  00000248  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  5 .debug_info   00000864  00000000  00000000  00000270  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  6 .debug_abbrev 000005da  00000000  00000000  00000ad4  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  7 .debug_line   00000323  00000000  00000000  000010ae  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  8 .debug_frame  00000034  00000000  00000000  000013d4  2**2
+                  CONTENTS, READONLY, DEBUGGING
+  9 .debug_str    00000334  00000000  00000000  00001408  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 10 .debug_loc    00000293  00000000  00000000  0000173c  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 11 .debug_ranges 00000018  00000000  00000000  000019cf  2**0
+                  CONTENTS, READONLY, DEBUGGING
+
+Disassembly of section .text:
+
+00000000 <__vectors>:
+   0:	0c 94 2a 00 	jmp	0x54	; 0x54 <__ctors_end>
+   4:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+   8:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+   c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  10:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  14:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  18:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  1c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  20:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  24:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  28:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  2c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  30:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  34:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  38:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  3c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  40:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  44:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  48:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  4c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  50:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+
+00000054 <__ctors_end>:
+  54:	11 24       	eor	r1, r1
+  56:	1f be       	out	0x3f, r1	; 63
+  58:	cf e5       	ldi	r28, 0x5F	; 95
+  5a:	d8 e0       	ldi	r29, 0x08	; 8
+  5c:	de bf       	out	0x3e, r29	; 62
+  5e:	cd bf       	out	0x3d, r28	; 61
+  60:	0e 94 3b 00 	call	0x76	; 0x76 <main>
+  64:	0c 94 c2 00 	jmp	0x184	; 0x184 <_exit>
+
+00000068 <__bad_interrupt>:
+  68:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
+
+0000006c <SPI_Transfer>:
+#define LED1	1
+#define LED2	2
+#define LED3	3
+unsigned char SPI_Transfer(unsigned char sendByte){
+	
+	SPDR =sendByte;
+  6c:	8f b9       	out	0x0f, r24	; 15
+	while(!(SPSR&(1<<SPIF)));
+  6e:	77 9b       	sbis	0x0e, 7	; 14
+  70:	fe cf       	rjmp	.-4      	; 0x6e <SPI_Transfer+0x2>
+	return SPDR;
+  72:	8f b1       	in	r24, 0x0f	; 15
+}
+  74:	08 95       	ret
+
+00000076 <main>:
+int main(void)
+{
+	DDRB|=(1<<MISO);
+  76:	be 9a       	sbi	0x17, 6	; 23
+	DDRB&=~(1<<SS); //input pin
+  78:	bc 98       	cbi	0x17, 4	; 23
+	DDRC|=(1<<LED0)|(1<<LED1)|(1<<LED2)|(1<<LED3);
+  7a:	84 b3       	in	r24, 0x14	; 20
+  7c:	8f 60       	ori	r24, 0x0F	; 15
+  7e:	84 bb       	out	0x14, r24	; 20
+	
+	SPCR|=(1<<SPE);
+  80:	6e 9a       	sbi	0x0d, 6	; 13
+			_delay_ms(1000);
+			break;
+			case 0xDD :
+			SPI_Transfer(0X77);
+			_delay_ms(1000);
+			PORTC^=(1<<LED2);
+  82:	04 e0       	ldi	r16, 0x04	; 4
+			_delay_ms(1000);
+			break;
+			case 0xFF :
+			SPI_Transfer(0X88);
+			_delay_ms(1000);
+			PORTC^=(1<<LED3);
+  84:	18 e0       	ldi	r17, 0x08	; 8
+		switch(recv)
+		{
+			case 0xAA :
+			SPI_Transfer(0X55);
+			_delay_ms(1000);
+			PORTC^=(1<<LED0);
+  86:	d1 e0       	ldi	r29, 0x01	; 1
+			SPDR=0X00;
+			break;
+			case 0xBB :
+			SPI_Transfer(0X66);
+			_delay_ms(1000);
+			PORTC^=(1<<LED1);
+  88:	c2 e0       	ldi	r28, 0x02	; 2
+	
+	SPCR|=(1<<SPE);
+
+	while (1)
+	{
+		unsigned char recv=SPI_Transfer(0x55);
+  8a:	85 e5       	ldi	r24, 0x55	; 85
+  8c:	0e 94 36 00 	call	0x6c	; 0x6c <SPI_Transfer>
+	#else
+		//round up by default
+		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
+	#endif
+
+	__builtin_avr_delay_cycles(__ticks_dc);
+  90:	2f ef       	ldi	r18, 0xFF	; 255
+  92:	33 ed       	ldi	r19, 0xD3	; 211
+  94:	90 e3       	ldi	r25, 0x30	; 48
+  96:	21 50       	subi	r18, 0x01	; 1
+  98:	30 40       	sbci	r19, 0x00	; 0
+  9a:	90 40       	sbci	r25, 0x00	; 0
+  9c:	e1 f7       	brne	.-8      	; 0x96 <main+0x20>
+  9e:	00 c0       	rjmp	.+0      	; 0xa0 <main+0x2a>
+  a0:	00 00       	nop
+		_delay_ms(1000);
+		switch(recv)
+  a2:	8b 3b       	cpi	r24, 0xBB	; 187
+  a4:	21 f1       	breq	.+72     	; 0xee <main+0x78>
+  a6:	18 f4       	brcc	.+6      	; 0xae <main+0x38>
+  a8:	8a 3a       	cpi	r24, 0xAA	; 170
+  aa:	39 f0       	breq	.+14     	; 0xba <main+0x44>
+  ac:	ee cf       	rjmp	.-36     	; 0x8a <main+0x14>
+  ae:	8d 3d       	cpi	r24, 0xDD	; 221
+  b0:	b9 f1       	breq	.+110    	; 0x120 <main+0xaa>
+  b2:	8f 3f       	cpi	r24, 0xFF	; 255
+  b4:	09 f4       	brne	.+2      	; 0xb8 <main+0x42>
+  b6:	4d c0       	rjmp	.+154    	; 0x152 <main+0xdc>
+  b8:	e8 cf       	rjmp	.-48     	; 0x8a <main+0x14>
+		{
+			case 0xAA :
+			SPI_Transfer(0X55);
+  ba:	85 e5       	ldi	r24, 0x55	; 85
+  bc:	0e 94 36 00 	call	0x6c	; 0x6c <SPI_Transfer>
+  c0:	2f ef       	ldi	r18, 0xFF	; 255
+  c2:	33 ed       	ldi	r19, 0xD3	; 211
+  c4:	80 e3       	ldi	r24, 0x30	; 48
+  c6:	21 50       	subi	r18, 0x01	; 1
+  c8:	30 40       	sbci	r19, 0x00	; 0
+  ca:	80 40       	sbci	r24, 0x00	; 0
+  cc:	e1 f7       	brne	.-8      	; 0xc6 <main+0x50>
+  ce:	00 c0       	rjmp	.+0      	; 0xd0 <main+0x5a>
+  d0:	00 00       	nop
+			_delay_ms(1000);
+			PORTC^=(1<<LED0);
+  d2:	85 b3       	in	r24, 0x15	; 21
+  d4:	8d 27       	eor	r24, r29
+  d6:	85 bb       	out	0x15, r24	; 21
+  d8:	9f ef       	ldi	r25, 0xFF	; 255
+  da:	23 ed       	ldi	r18, 0xD3	; 211
+  dc:	30 e3       	ldi	r19, 0x30	; 48
+  de:	91 50       	subi	r25, 0x01	; 1
+  e0:	20 40       	sbci	r18, 0x00	; 0
+  e2:	30 40       	sbci	r19, 0x00	; 0
+  e4:	e1 f7       	brne	.-8      	; 0xde <main+0x68>
+  e6:	00 c0       	rjmp	.+0      	; 0xe8 <main+0x72>
+  e8:	00 00       	nop
+			_delay_ms(1000);
+			SPDR=0X00;
+  ea:	1f b8       	out	0x0f, r1	; 15
+			break;
+  ec:	ce cf       	rjmp	.-100    	; 0x8a <main+0x14>
+			case 0xBB :
+			SPI_Transfer(0X66);
+  ee:	86 e6       	ldi	r24, 0x66	; 102
+  f0:	0e 94 36 00 	call	0x6c	; 0x6c <SPI_Transfer>
+  f4:	8f ef       	ldi	r24, 0xFF	; 255
+  f6:	93 ed       	ldi	r25, 0xD3	; 211
+  f8:	20 e3       	ldi	r18, 0x30	; 48
+  fa:	81 50       	subi	r24, 0x01	; 1
+  fc:	90 40       	sbci	r25, 0x00	; 0
+  fe:	20 40       	sbci	r18, 0x00	; 0
+ 100:	e1 f7       	brne	.-8      	; 0xfa <main+0x84>
+ 102:	00 c0       	rjmp	.+0      	; 0x104 <main+0x8e>
+ 104:	00 00       	nop
+			_delay_ms(1000);
+			PORTC^=(1<<LED1);
+ 106:	85 b3       	in	r24, 0x15	; 21
+ 108:	8c 27       	eor	r24, r28
+ 10a:	85 bb       	out	0x15, r24	; 21
+ 10c:	3f ef       	ldi	r19, 0xFF	; 255
+ 10e:	83 ed       	ldi	r24, 0xD3	; 211
+ 110:	90 e3       	ldi	r25, 0x30	; 48
+ 112:	31 50       	subi	r19, 0x01	; 1
+ 114:	80 40       	sbci	r24, 0x00	; 0
+ 116:	90 40       	sbci	r25, 0x00	; 0
+ 118:	e1 f7       	brne	.-8      	; 0x112 <main+0x9c>
+ 11a:	00 c0       	rjmp	.+0      	; 0x11c <main+0xa6>
+ 11c:	00 00       	nop
+ 11e:	b5 cf       	rjmp	.-150    	; 0x8a <main+0x14>
+			_delay_ms(1000);
+			break;
+			case 0xDD :
+			SPI_Transfer(0X77);
+ 120:	87 e7       	ldi	r24, 0x77	; 119
+ 122:	0e 94 36 00 	call	0x6c	; 0x6c <SPI_Transfer>
+ 126:	2f ef       	ldi	r18, 0xFF	; 255
+ 128:	33 ed       	ldi	r19, 0xD3	; 211
+ 12a:	80 e3       	ldi	r24, 0x30	; 48
+ 12c:	21 50       	subi	r18, 0x01	; 1
+ 12e:	30 40       	sbci	r19, 0x00	; 0
+ 130:	80 40       	sbci	r24, 0x00	; 0
+ 132:	e1 f7       	brne	.-8      	; 0x12c <main+0xb6>
+ 134:	00 c0       	rjmp	.+0      	; 0x136 <main+0xc0>
+ 136:	00 00       	nop
+			_delay_ms(1000);
+			PORTC^=(1<<LED2);
+ 138:	85 b3       	in	r24, 0x15	; 21
+ 13a:	80 27       	eor	r24, r16
+ 13c:	85 bb       	out	0x15, r24	; 21
+ 13e:	9f ef       	ldi	r25, 0xFF	; 255
+ 140:	23 ed       	ldi	r18, 0xD3	; 211
+ 142:	30 e3       	ldi	r19, 0x30	; 48
+ 144:	91 50       	subi	r25, 0x01	; 1
+ 146:	20 40       	sbci	r18, 0x00	; 0
+ 148:	30 40       	sbci	r19, 0x00	; 0
+ 14a:	e1 f7       	brne	.-8      	; 0x144 <main+0xce>
+ 14c:	00 c0       	rjmp	.+0      	; 0x14e <main+0xd8>
+ 14e:	00 00       	nop
+ 150:	9c cf       	rjmp	.-200    	; 0x8a <main+0x14>
+			_delay_ms(1000);
+			break;
+			case 0xFF :
+			SPI_Transfer(0X88);
+ 152:	88 e8       	ldi	r24, 0x88	; 136
+ 154:	0e 94 36 00 	call	0x6c	; 0x6c <SPI_Transfer>
+ 158:	8f ef       	ldi	r24, 0xFF	; 255
+ 15a:	93 ed       	ldi	r25, 0xD3	; 211
+ 15c:	20 e3       	ldi	r18, 0x30	; 48
+ 15e:	81 50       	subi	r24, 0x01	; 1
+ 160:	90 40       	sbci	r25, 0x00	; 0
+ 162:	20 40       	sbci	r18, 0x00	; 0
+ 164:	e1 f7       	brne	.-8      	; 0x15e <main+0xe8>
+ 166:	00 c0       	rjmp	.+0      	; 0x168 <main+0xf2>
+ 168:	00 00       	nop
+			_delay_ms(1000);
+			PORTC^=(1<<LED3);
+ 16a:	85 b3       	in	r24, 0x15	; 21
+ 16c:	81 27       	eor	r24, r17
+ 16e:	85 bb       	out	0x15, r24	; 21
+ 170:	3f ef       	ldi	r19, 0xFF	; 255
+ 172:	83 ed       	ldi	r24, 0xD3	; 211
+ 174:	90 e3       	ldi	r25, 0x30	; 48
+ 176:	31 50       	subi	r19, 0x01	; 1
+ 178:	80 40       	sbci	r24, 0x00	; 0
+ 17a:	90 40       	sbci	r25, 0x00	; 0
+ 17c:	e1 f7       	brne	.-8      	; 0x176 <main+0x100>
+ 17e:	00 c0       	rjmp	.+0      	; 0x180 <main+0x10a>
+ 180:	00 00       	nop
+ 182:	83 cf       	rjmp	.-250    	; 0x8a <main+0x14>
+
+00000184 <_exit>:
+ 184:	f8 94       	cli
+
+00000186 <__stop_program>:
+ 186:	ff cf       	rjmp	.-2      	; 0x186 <__stop_program>
